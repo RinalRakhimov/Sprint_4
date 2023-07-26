@@ -112,4 +112,9 @@ public class OrderPage {
         return driver.findElement(orderConfirmIsVisible).isDisplayed();
     }
 
+    public boolean nameFieldIsVisible() {
+
+        return driver.findElement(nameField).isDisplayed();
+    }
+
 }

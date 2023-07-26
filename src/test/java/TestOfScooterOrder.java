@@ -21,16 +21,16 @@ public class TestOfScooterOrder {
     private final String address;
     private final String phone;
     private final String rentDuration;
+
     private String date;
     private int stationIndex;
     private String stationName;
     private String color;
     private String setComments;
-    private String buttonClassName;
 
-    public TestOfScooterOrder(String buttonClassName, String name, String surname, String address,
+    public TestOfScooterOrder(String name, String surname, String address,
                               int stationIndex, String stationName, String phone, String date, String rentDuration, String color, String setComments) {
-        this.buttonClassName = buttonClassName;
+
         this.name = name;
         this.surname = surname;
         this.address = address;
@@ -48,10 +48,10 @@ public class TestOfScooterOrder {
     public static Object[][] getTestData() {
         //Сгенерируй тестовые данные
         return new Object[][]{
-                {"Button_Button__ra12g", "Иван", "Грозный", "г. Москва, Народная улица, 4с1", 1, "Бульвар Рокоссовского",
+                {"Иван", "Грозный", "г. Москва, Народная улица, 4с1", 1, "Бульвар Рокоссовского",
                         "+79378546748", "Choose пятница, 28-е июля 2023 г.",
                         "двое суток", "black", "Можно побыстрей? Хочу кататься!"},
-                {"Button_Button__ra12g Button_UltraBig__UU3Lp", "Ляпис", "Трубецкой", "г. Москва, Нижегородская улица, 7", 114, "Ясенево",
+                {"Ляпис", "Трубецкой", "г. Москва, Нижегородская улица, 7", 114, "Ясенево",
                         "+79773335555", "Choose вторник, 1-е августа 2023 г.",
                         "семеро суток", "grey", "Когда мне было 15 лет, я копил на новенький мопед..."},
         };
@@ -72,12 +72,20 @@ public class TestOfScooterOrder {
 
 
         MainPage objMainPage = new MainPage(driver);
-        objMainPage.open();
-        objMainPage.scrollToOrderButton(buttonClassName);
-        objMainPage.orderButtonClick(buttonClassName);
-
-
         OrderPage objOrderPage = new OrderPage(driver, name, surname, address, phone, setComments);
+        objMainPage.open();
+        // кликаем по верхней кнопке "Заказать"
+        objMainPage.upperOrderButtonClick();
+        // проверяем, что страница заказа открылась
+        assertTrue("Страница заказа не открылась", objOrderPage.nameFieldIsVisible());
+        objMainPage.open();
+        objMainPage.scrollToLowerOrderButton();
+        // кликаем по нижней кнопке "Заказать"
+        objMainPage.lowerOrderButtonClick();
+        //проверяем, что страница открылась
+        assertTrue("Страница заказа не открылась", objOrderPage.nameFieldIsVisible());
+
+
         objOrderPage.userDataFilling(stationIndex, stationName);
         objOrderPage.nextButtonClick();
         objOrderPage.rentDetailsFilling(color, rentDuration, date);

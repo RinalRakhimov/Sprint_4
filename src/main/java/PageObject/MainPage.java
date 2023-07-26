@@ -23,6 +23,10 @@ public class MainPage {
     // локатор для поиска среди элементов ответа
     private By responseFAQ = By.xpath(".//p");
 
+    private By orderButtonUpper = By.xpath(".//button[@class='Button_Button__ra12g']");
+
+    private By orderButtonLower = By.xpath(".//button[@class='Button_Button__ra12g Button_UltraBig__UU3Lp']");
+
     // Добавили конструктор класса page object
     public MainPage (WebDriver driver) {
 
@@ -39,8 +43,8 @@ public class MainPage {
         ((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView();", element);
     }
 
-    public void scrollToOrderButton(String buttonClassName) {
-        WebElement element = driver.findElement(By.xpath(".//button[@class='" + buttonClassName + "']"));
+    public void scrollToLowerOrderButton() {
+        WebElement element = driver.findElement(orderButtonLower);
         ((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView();", element);
     }
 
@@ -69,8 +73,12 @@ public class MainPage {
         return responseElement.getText();
     }
 
-    public void orderButtonClick(String buttonClassName) {
-        driver.findElement(By.xpath(".//button[@class='"+ buttonClassName +"']")).click();
+    public void upperOrderButtonClick() {
+        driver.findElement(orderButtonUpper).click();
+    }
+
+    public void lowerOrderButtonClick() {
+        driver.findElement(orderButtonLower).click();
     }
 
 }
