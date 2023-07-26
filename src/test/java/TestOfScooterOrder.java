@@ -1,10 +1,13 @@
+import PageObject.MainPage;
 import PageObject.OrderPage;
 import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
 import static org.junit.Assert.assertTrue;
@@ -12,61 +15,75 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Parameterized.class)
 public class TestOfScooterOrder {
 
-    private By orderButtonUpper = By.xpath(".//button[@class='Button_Button__ra12g' and text()='Заказать']");
+
     private final String name;
     private final String surname;
     private final String address;
-    private final By metroStationChoosing;
     private final String phone;
-    private By setDate;
-    private By setRent;
-    private By checkbox;
+    private final String rentDuration;
+    private String date;
+    private int stationIndex;
+    private String stationName;
+    private String color;
     private String setComments;
+    private String buttonClassName;
 
-    public TestOfScooterOrder(String name, String surname, String address,
-                              By metroStationChoosing, String phone, By setDate, By setRent, By checkbox, String setComments) {
+    public TestOfScooterOrder(String buttonClassName, String name, String surname, String address,
+                              int stationIndex, String stationName, String phone, String date, String rentDuration, String color, String setComments) {
+        this.buttonClassName = buttonClassName;
         this.name = name;
         this.surname = surname;
         this.address = address;
-        this.metroStationChoosing = metroStationChoosing;
+        this.stationIndex = stationIndex;
+        this.stationName = stationName;
         this.phone = phone;
-        this.setDate = setDate;
-        this.setRent = setRent;
-        this.checkbox = checkbox;
+        this.date = date;
+        this.rentDuration = rentDuration;
+        this.color = color;
         this.setComments = setComments;
     }
 
 
     @Parameterized.Parameters(name = "Заказ самоката")
     public static Object[][] getTestData() {
-        //Сгенерируй тестовые данные (нам нужно название городов и результат поиска)
+        //Сгенерируй тестовые данные
         return new Object[][]{
-                {"Иван", "Грозный", "г. Москва, Народная улица, 4с1", By.xpath(".//div[@class='select-search__select']/ul/li/button[@value='1']/div[text()='Бульвар Рокоссовского']"),
-                        "+79378546748", By.xpath(".//div[@aria-label='Choose пятница, 28-е июля 2023 г.']"),
-                        By.xpath(".//div[text()='двое суток']"), By.xpath(".//input[@id='black']"), "Можно побыстрей? Хочу кататься!"},
-                {"Ляпис", "Трубецкой", "г. Москва, Нижегородская улица, 7", By.xpath(".//div[@class='select-search__select']/ul/li/button[@value='114']/div[text()='Ясенево']"),
-                        "+79773335555", By.xpath(".//div[@aria-label='Choose вторник, 1-е августа 2023 г.']"),
-                        By.xpath(".//div[text()='семеро суток']"), By.xpath(".//input[@id='grey']"), "Когда мне было 15 лет, я копил на новенький мопед..."},
+                {"Button_Button__ra12g", "Иван", "Грозный", "г. Москва, Народная улица, 4с1", 1, "Бульвар Рокоссовского",
+                        "+79378546748", "Choose пятница, 28-е июля 2023 г.",
+                        "двое суток", "black", "Можно побыстрей? Хочу кататься!"},
+                {"Button_Button__ra12g Button_UltraBig__UU3Lp", "Ляпис", "Трубецкой", "г. Москва, Нижегородская улица, 7", 114, "Ясенево",
+                        "+79773335555", "Choose вторник, 1-е августа 2023 г.",
+                        "семеро суток", "grey", "Когда мне было 15 лет, я копил на новенький мопед..."},
         };
 
     }
 
     private WebDriver driver;
 
-    String URL = "https://qa-scooter.praktikum-services.ru/";
-
-    @org.junit.Test
-    public void checkOrder() {
+    @Before
+    public void before() {
+        ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.addArguments("--remote-allow-origins=*");
         driver = new ChromeDriver();
-        driver.get(URL);
-        driver.findElement(orderButtonUpper).click();
-        OrderPage objOrderPage = new OrderPage(driver, name, surname, address, metroStationChoosing, phone, setDate, setRent, checkbox, setComments);
-        objOrderPage.userDataFilling();
+    }
+
+    @Test
+    public void checkOrder() {
+
+
+        MainPage objMainPage = new MainPage(driver);
+        objMainPage.open();
+        objMainPage.scrollToOrderButton(buttonClassName);
+        objMainPage.orderButtonClick(buttonClassName);
+
+
+        OrderPage objOrderPage = new OrderPage(driver, name, surname, address, phone, setComments);
+        objOrderPage.userDataFilling(stationIndex, stationName);
         objOrderPage.nextButtonClick();
-        objOrderPage.rentDetailsFilling();
+        objOrderPage.rentDetailsFilling(color, rentDuration, date);
         objOrderPage.clickBookingButton();
         objOrderPage.orderConfirmation();
-        assertTrue("Не удалось создать заказ", objOrderPage.OrderConfirmationStatus());
+        assertTrue("Не удалось создать заказ", objOrderPage.orderConfirmationStatus());
         System.out.println("Заказ успешно оформлен!");
 
     }

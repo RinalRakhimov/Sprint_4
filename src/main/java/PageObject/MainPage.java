@@ -4,30 +4,35 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.util.List;
 
 
 public class MainPage {
 
-    private WebDriver driver;
+    private final WebDriver driver;
 
-    //локатор стрелочки с вопросом в блоке "Вопросы о важном"
-    private By questionLocator;
-    //локатор текста ответа
-    private By answerLocator;
-    // кнопка "Заказать" вверху страницы
-    private By orderButtonUpper = By.xpath(".//button[@class='Button_Button__ra12g' and text()='Заказать']");
+    public String URL = "https://qa-scooter.praktikum-services.ru/";
 
-    private final String answerText;
+    // локатор для поиска элемента из списка вопросов
+    private By FAQ = By.xpath(".//div[@class='accordion__item']");
+
+    // локатор для поиска дочернего элемента списка вопросов с возможностью кликать на него
+    private By FAQIncludedClickableButton = By.xpath(".//div[@class='accordion__heading']");
+
+    // локатор для поиска среди элементов ответа
+    private By responseFAQ = By.xpath(".//p");
+
 
     // Добавили конструктор класса page object
-    public MainPage (WebDriver driver, String answerText, By questionLocator, By answerLocator){
+    public MainPage (WebDriver driver) {
+
         this.driver = driver;
-        this.answerText = answerText;
-        this.answerLocator = answerLocator;
-        this.questionLocator = questionLocator;
     }
+     public void open() {
+
+        driver.get(URL);
+     }
 
     //метод прокрутки до блока "Вопросы о важном"
     public void scrollToQuestionBlock() {
@@ -35,15 +40,38 @@ public class MainPage {
         ((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView();", element);
     }
 
-    //метод ожидания кликабельности стрелочки с вопросом
-    public void waitForQuestionButtonClickable() {
-        new WebDriverWait(driver, 3)
-                .until(ExpectedConditions.elementToBeClickable(questionLocator));
+    public void scrollToOrderButton(String buttonClassName) {
+        WebElement element = driver.findElement(By.xpath(".//button[@class='" + buttonClassName + "']"));
+        ((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView();", element);
+    }
+
+    public WebElement getFAQElement(int index) {
+        List<WebElement> itemList = driver.findElements(FAQ);
+        return itemList.get(index);
     }
 
     //метод нажатия на стрелочку с вопросом
-    public void questionButtonClick() {
-        driver.findElement(questionLocator).click();
+    public void questionButtonClick(int index) {
+
+        WebElement item = getFAQElement(index);
+        WebElement itemButton = item.findElement(FAQIncludedClickableButton);
+        itemButton.click();
+    }
+
+    public String questionList(int index) {
+        WebElement item = getFAQElement(index);
+        WebElement questionElement = item.findElement(FAQIncludedClickableButton);
+        return questionElement.getText();
+    }
+
+    public String responseList(int index) {
+        WebElement item = getFAQElement(index);
+        WebElement responseElement = item.findElement(responseFAQ);
+        return responseElement.getText();
+    }
+
+    public void orderButtonClick(String buttonClassName) {
+        driver.findElement(By.xpath(".//button[@class='"+ buttonClassName +"']")).click();
     }
 
 }

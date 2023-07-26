@@ -20,9 +20,6 @@ public class OrderPage {
     // локатор поля "Станция метро"
     private By metroStationField = By.xpath(".//div[@class='select-search']");
 
-    //локатор станции метро из списка
-    private By metroStationChoosing;
-
     // локатор поля "Телефон"
     private By phoneNumberField = By.xpath(".//input[@placeholder='* Телефон: на него позвонит курьер']");
 
@@ -36,17 +33,8 @@ public class OrderPage {
     // локатор поля "Когда привезти самокат"
     private By bringDateField = By.xpath(".//input[@placeholder='* Когда привезти самокат']");
 
-    // локатор выбранной даты доставки
-    private By setDate;
-
     // локатор поля "Срока аренды"
     private By rentDurationField = By.xpath(".//div[text()='* Срок аренды']");
-
-    // локатор выбранного срока аренды
-    private By setRent;
-
-    // локатор чекбокса выбора цвета самоката
-    private By checkbox;
 
     //локатор поля "Комментарий для курьера"
     private By comments = By.xpath(".//input[@placeholder='Комментарий для курьера']");
@@ -62,25 +50,21 @@ public class OrderPage {
     private By orderConfirmIsVisible = By.xpath(".//div[text()='Заказ оформлен']");
 
     // Добавили конструктор класса page object
-    public OrderPage (WebDriver driver, String name, String surname, String address,
-                      By metroStationChoosing, String phone, By setDate, By setRent, By checkbox, String setComments) {
+    public OrderPage (WebDriver driver, String name, String surname, String address, String phone, String setComments) {
         this.driver = driver;
         this.name = name;
         this.surname = surname;
         this.address = address;
-        this.metroStationChoosing = metroStationChoosing;
         this.phone = phone;
-        this.setDate = setDate;
-        this.setRent = setRent;
-        this.checkbox = checkbox;
         this.setComments = setComments;
     }
 
-    public void scrollToMetroStation() {
+    public void scrollToMetroStation(int stationIndex, String stationName) {
+        By metroStationChoosing = By.xpath(".//button[@value='"+ stationIndex +"']/div[text()='"+ stationName +"']");
         WebElement element = driver.findElement(metroStationChoosing);
         ((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView();", element);
     }
-    public void userDataFilling() {
+    public void userDataFilling(int stationIndex, String stationName) {
         driver.findElement(nameField).clear();
         driver.findElement(nameField).sendKeys(name);
         driver.findElement(surnameField).clear();
@@ -88,8 +72,8 @@ public class OrderPage {
         driver.findElement(addressField).clear();
         driver.findElement(addressField).sendKeys(address);
         driver.findElement(metroStationField).click();
-        scrollToMetroStation();
-        driver.findElement(metroStationChoosing).click();
+        scrollToMetroStation(stationIndex, stationName);
+        driver.findElement(By.xpath(".//button[@value='"+ stationIndex +"']/div[text()='"+ stationName +"']")).click();
         driver.findElement(phoneNumberField).clear();
         driver.findElement(phoneNumberField).sendKeys(phone);
     }
@@ -98,12 +82,18 @@ public class OrderPage {
         driver.findElement(nextButton).click();
     }
 
-    public void rentDetailsFilling() {
+    public void rentDetailsFilling(String color, String rentDuration, String date) {
         driver.findElement(bringDateField).clear();
         driver.findElement(bringDateField).click();
+        // локатор выбранной даты доставки
+        By setDate = By.xpath(".//div[@aria-label='"+ date +"']");
         driver.findElement(setDate).click();
         driver.findElement(rentDurationField).click();
+        // локатор выбранного срока аренды
+        By setRent = By.xpath(".//div[text()='"+ rentDuration +"']");
         driver.findElement(setRent).click();
+        // локатор чекбокса выбора цвета самоката
+        By checkbox = By.xpath(".//input[@id='"+ color +"']");
         driver.findElement(checkbox).click();
         driver.findElement(comments).clear();
         driver.findElement(comments).sendKeys(setComments);
@@ -117,7 +107,7 @@ public class OrderPage {
         driver.findElement(orderConfirmButton).click();
     }
 
-    public boolean OrderConfirmationStatus() {
+    public boolean orderConfirmationStatus() {
 
         return driver.findElement(orderConfirmIsVisible).isDisplayed();
     }

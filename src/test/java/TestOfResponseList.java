@@ -1,10 +1,12 @@
 import PageObject.MainPage;
 import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
 import static org.junit.Assert.assertEquals;
@@ -14,52 +16,53 @@ import static org.junit.Assert.assertEquals;
 public class TestOfResponseList {
 
 
-    private final By questionLocator;
-    private final By answerLocator;
-    private final String answerText;
+    private int index;
+    private String questionText;
+    private String answerText;
 
 
-    public TestOfResponseList(By questionLocator, By answerLocator, String answerText) {
-        this.questionLocator = questionLocator;
-        this.answerLocator = answerLocator;
+    public TestOfResponseList(int index, String questionText, String answerText) {
+        this.index = index;
+        this.questionText = questionText;
         this.answerText = answerText;
 
     }
 
 
-    @Parameterized.Parameters(name = "Ожидаемый текст: {2}")
+    @Parameterized.Parameters()
     public static Object[][] getTestData() {
-        //Сгенерируй тестовые данные (нам нужно название городов и результат поиска)
+        //Сгенерируй тестовые данные
         return new Object[][]{
-                {By.xpath(".//div[@id='accordion__heading-0' and text()='Сколько это стоит? И как оплатить?']"), By.xpath(".//div[@id='accordion__panel-0']/p[text()='Сутки — 400 рублей. Оплата курьеру — наличными или картой.']"),
-                        "Сутки — 400 рублей. Оплата курьеру — наличными или картой."},
-                {By.xpath(".//div[@id='accordion__heading-7' and text()='Я жизу за МКАДом, привезёте?']"), By.xpath(".//div[@id='accordion__panel-7']/p[text()='Да, обязательно. Всем самокатов! И Москве, и Московской области.']"),
-                        "Да, обязательно. Всем самокатов! И Москве, и Московской области."},
+                {0, "Сколько это стоит? И как оплатить?", "Сутки — 400 рублей. Оплата курьеру — наличными или картой."},
+                {1, "Хочу сразу несколько самокатов! Так можно?", "Пока что у нас так: один заказ — один самокат. Если хотите покататься с друзьями, можете просто сделать несколько заказов — один за другим."},
         };
 
     }
 
     private WebDriver driver;
 
-    String URL = "https://qa-scooter.praktikum-services.ru/";
-
-    @org.junit.Test
-    public void checkOfResponseList() {
-        // драйвер для браузера Chrome
-
+    @Before
+    public void before() {
+        ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.addArguments("--remote-allow-origins=*");
         driver = new ChromeDriver();
+    }
+
+    @Test
+    public void checkOfResponseList() {
+
         // переход на страницу тестового приложения
-        driver.get(URL);
+        MainPage objMainPage = new MainPage(driver);
 
-        MainPage objMainPage = new MainPage(driver, answerText, questionLocator, answerLocator);
-
+        objMainPage.open();
         objMainPage.scrollToQuestionBlock();
-        objMainPage.waitForQuestionButtonClickable();
-        objMainPage.questionButtonClick();
+        objMainPage.getFAQElement(index);
+        objMainPage.questionButtonClick(index);
 
-        assertEquals("Текст не соотвестсвует ожидаемому", answerText, driver.findElement(answerLocator).getText());
-        System.out.println("При нажатии на стрелочку с вопросом: " + driver.findElement(questionLocator).getText());
-        System.out.println("Открывается ожидаемый текст: " + driver.findElement(answerLocator).getText());
+
+        assertEquals("Текст вопроса не соотвестсвует ожидаемому", questionText, objMainPage.questionList(index));
+        assertEquals("Текст ответа не соотвестсвует ожидаемому", answerText, objMainPage.responseList(index));
+
     }
 
     @After
