@@ -23,7 +23,6 @@ public class MainPage {
     // локатор для поиска среди элементов ответа
     private By responseFAQ = By.xpath(".//p");
 
-
     // Добавили конструктор класса page object
     public MainPage (WebDriver driver) {
 
